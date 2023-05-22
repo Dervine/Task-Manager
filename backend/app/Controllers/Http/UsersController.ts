@@ -48,6 +48,6 @@ export default class UsersController {
 
     await user.delete()
 
-    return response.status(204).send('hello world')
+    return response.status(204).send('Deleted')
   }
 }
