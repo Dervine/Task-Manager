@@ -3,6 +3,7 @@
       :headers="headers"
       :items="desserts"
       :hide-default-footer="true"
+      @click:row="handleClick"
       sort-by="id"
       class="elevation-1"
     >
@@ -96,11 +97,11 @@
           </v-dialog>
           <v-dialog v-model="dialogDelete" max-width="500px">
             <v-card>
-              <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
+              <v-card-title class="text-h5">Are you sure you want to delete this user?</v-card-title>
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="blue darken-1" text @click="closeDelete">Cancel</v-btn>
-                <v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn>
+                <v-btn color="blue darken-1" text @click="deleteItemConfirm(item)">OK</v-btn>
                 <v-spacer></v-spacer>
               </v-card-actions>
             </v-card>
@@ -132,11 +133,13 @@
       </template>
     </v-data-table>
   </template>
+
 <script>
   export default {
     data: () => ({
       dialog: false,
       dialogDelete: false,
+      currentUser: 0,
       headers: [
         { text: 'Id', value: 'id' },
         {
@@ -152,17 +155,13 @@
       editedIndex: -1,
       editedItem: {
         name: '',
-        calories: 0,
-        fat: 0,
-        carbs: 0,
-        protein: 0,
+        email: '',
+        password: '',
       },
       defaultItem: {
         name: '',
-        calories: 0,
-        fat: 0,
-        carbs: 0,
-        protein: 0,
+        email: '',
+        password: '',
       },
     }),
 
@@ -174,7 +173,6 @@
 
     watch: {
       dialog (val) {
-        console.log(val)
         val || this.close()
       },
       dialogDelete (val) {
@@ -187,19 +185,25 @@
     },
 
     methods: {
-      initialize () {
-        this.desserts = [
-          {
-            name: 'Jane Doe',
-            email: 'janedoe@mail.com',
-            id: 1,
-          },
-          {
-            name: 'Dervine Nyakundi',
-            email: 'dervinenyakundi@gmail.com',
-            id: 3,
-          },
-        ]
+      async initialize () {
+        const self = this;
+        fetch('http://localhost:3333/v1/users')
+        .then(
+        function(response) {
+            if (response.status === 200) {
+              response.json().then(function(data) {
+              self.desserts = data;
+            });
+            }
+        }
+        )
+        .catch(function(err) {
+        console.log('Fetch Error :-S', err);
+        });
+      },
+
+      refreshList() {
+        this.initialize();
       },
 
       editItem (item) {
@@ -214,8 +218,16 @@
         this.dialogDelete = true
       },
 
+      handleClick(value) {
+        this.currentUser = value.id
+      },
+
       deleteItemConfirm () {
-        this.desserts.splice(this.editedIndex, 1)
+        const self = this;
+        fetch('http://localhost:3333/v1/users/' + this.currentUser, {
+          method: 'DELETE',
+        })
+        .then(res => {     console.log(res);     self.refreshList() })
         this.closeDelete()
       },
 
@@ -236,11 +248,34 @@
       },
 
       save () {
-        if (this.editedIndex > -1) {
-          Object.assign(this.desserts[this.editedIndex], this.editedItem)
+        const self = this;
+        let callMethod = null;
+        let url = '';
+        if(this.editedItem.id) {
+          url = `http://localhost:3333/v1/users/${this.editedItem.id}`
+          callMethod = {
+            method: 'put',
+            headers: {
+              'Content-type': 'application/json; charset=UTF-8' 
+            },
+            body: JSON.stringify(this.editedItem)
+          }
         } else {
-          this.desserts.push(this.editedItem)
+          url = 'http://localhost:3333/v1/users/'
+          callMethod = {
+            method: 'post',
+            headers: {
+              'Content-type': 'application/json; charset=UTF-8' 
+            },
+            body: JSON.stringify(this.editedItem)
+          }
         }
+        fetch(url, callMethod)
+          .then(response => response.json())
+          .then(res => {     console.log(res);     self.refreshList() })
+          .catch(function (error) {
+          console.log('Request failed', error);
+        });
         this.close()
       },
     },
