@@ -166,6 +166,9 @@
     }),
 
     computed: {
+      baseUrl () {
+        return 'http://localhost:3333/v1/users/'
+      },
       formTitle () {
         return this.editedIndex === -1 ? 'New User' : 'Edit User'
       },
@@ -187,7 +190,7 @@
     methods: {
       async initialize () {
         const self = this;
-        fetch('http://localhost:3333/v1/users')
+        fetch(this.baseUrl)
         .then(
         function(response) {
             if (response.status === 200) {
@@ -224,7 +227,7 @@
 
       deleteItemConfirm () {
         const self = this;
-        fetch('http://localhost:3333/v1/users/' + this.currentUser, {
+        fetch(this.baseUrl + this.currentUser, {
           method: 'DELETE',
         })
         .then(res => {     console.log(res);     self.refreshList() })
@@ -261,7 +264,7 @@
             body: JSON.stringify(this.editedItem)
           }
         } else {
-          url = 'http://localhost:3333/v1/users/'
+          url = this.baseUrl
           callMethod = {
             method: 'post',
             headers: {
