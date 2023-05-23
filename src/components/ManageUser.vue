@@ -1,10 +1,9 @@
 <template>
     <v-data-table
       :headers="headers"
-      :items="desserts"
+      :items="users"
       :hide-default-footer="true"
       @click:row="handleClick"
-      sort-by="id"
       class="elevation-1"
     >
       <template v-slot:top>
@@ -141,17 +140,17 @@
       dialogDelete: false,
       currentUser: 0,
       headers: [
-        { text: 'Id', value: 'id' },
+        { text: 'Id', value: 'id', align:'left' },
         {
           text: 'Name',
           align: 'start',
           sortable: false,
           value: 'name',
         },
-        { text: 'Email', value: 'email' },
+        { text: 'Email', value: 'email', sortable: false, },
         { text: 'Actions', value: 'actions', sortable: false },
       ],
-      desserts: [],
+      users: [],
       editedIndex: -1,
       editedItem: {
         name: '',
@@ -195,7 +194,7 @@
         function(response) {
             if (response.status === 200) {
               response.json().then(function(data) {
-              self.desserts = data;
+              self.users = data;
             });
             }
         }
@@ -210,13 +209,13 @@
       },
 
       editItem (item) {
-        this.editedIndex = this.desserts.indexOf(item)
+        this.editedIndex = this.users.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
       },
 
       deleteItem (item) {
-        this.editedIndex = this.desserts.indexOf(item)
+        this.editedIndex = this.users.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialogDelete = true
       },
