@@ -25,7 +25,7 @@
               <v-btn
                 color="primary"
                 dark
-                class="mb-2"
+                class="mb-2 btn-new-user"
                 v-bind="attrs"
                 v-on="on"
               >
@@ -283,3 +283,8 @@
     },
   }
 </script>
+<style scoped>
+.btn-new-user {
+  background-color: red !important ;
+}
+</style>
